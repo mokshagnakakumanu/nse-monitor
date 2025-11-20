@@ -37,13 +37,25 @@ def get_ist_time():
         return datetime.now().strftime("%H:%M:%S")
 
 def send_telegram_alert(message):
-    if not TELEGRAM_BOT_TOKEN: return
+    if not TELEGRAM_BOT_TOKEN: 
+        print("❌ Telegram Token is MISSING in Env Vars")
+        return
+        
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
+    
     try:
-        requests.post(url, json=payload, timeout=5)
+        # Send request
+        res = requests.post(url, json=payload, timeout=5)
+        
+        # PRINT THE EXACT TELEGRAM RESPONSE
+        if res.status_code == 200:
+            print(f"✅ Telegram Sent: {res.json()}")
+        else:
+            print(f"❌ Telegram ERROR {res.status_code}: {res.text}")
+            
     except Exception as e:
-        print(f"⚠️ Telegram failed: {e}")
+        print(f"⚠️ Telegram Exception: {e}")
 
 def get_access_token():
     if not API_KEY: return None
@@ -310,3 +322,4 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
